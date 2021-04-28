@@ -1,0 +1,76 @@
+table space:-
+create tablespace t1 datafile 'c:\a.dbf' size 1m;
+create tablespace t2 datafile 'd:\b.dbf' size 1m;
+create tablespace t3 datafile 'e:\c.dbf' size 1m;
+
+
+create table bank(accno number,name varchar2(10),balance number) partition by range(balance)
+(partition p1 values less than(10000)tablespace t1,
+ partition p2 values less than(20000)tablespace t2,
+partition p3 values less than(100000)tablespace t3);
+
+select * from bank;
+---------------------------------------------------------
+CREATE OR REPLACE TRIGGER t1 
+BEFORE INSERT ON mphasisemp189
+BEGIN
+IF(TO_CHAR(SYSDATE,'DY')IN('SAT','SUN')) OR 
+(TO_CHAR(SYSDATE,'HH24:MI') NOT BETWEEN '08' AND '15')
+THEN RAISE_APPLICATION_ERROR(-20500,'You may insert into employees table only during business hours');
+END IF;
+END;
+ 
+SELECT * FROM MPHASISEMP189;
+
+insert into mphasisemp187 values(105,'SUNIL','sot');
+-----------------------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE TRIGGER t11
+BEFORE INSERT OR UPDATE OR DELETE ON mphasisemp 
+BEGIN
+IF(TO_CHAR(SYSDATE,'DY')IN('SAT','SUN')) OR 
+(TO_CHAR(SYSDATE,'HH24:MI') NOT BETWEEN '08' AND '15')
+THEN
+IF DELETING THEN
+RAISE_APPLICATION_ERROR(-20502,'You may delete from employees table only during business hours');
+ELSIF INSERTING THEN
+RAISE_APPLICATION_ERROR(-20500,'You may insert into employees table only during business hours');
+ELSIF UPDATING ('salary') THEN
+RAISE_APPLICATION_ERROR(-20503,'You may update into employees table only during business hours');
+ELSE
+RAISE_APPLICATION_ERROR(-20504,'You may update into employees table only during normal hours');
+END IF;
+END IF;
+END;
+--------------------------------------------------------------------------------------
+CREATE OR REPLACE TRIGGER display_salary_change  
+BEFORE INSERT OR UPDATE ON mphasisemp  
+FOR EACH ROW  WHEN (NEW.empID > 0)  
+DECLARE     
+sal_diff number;  
+BEGIN     
+sal_diff := :NEW.salary  - :OLD.salary;     
+dbms_output.put_line('Old salary: ' || :OLD.salary);     
+dbms_output.put_line('New salary: ' || :NEW.salary);     
+dbms_output.put_line('Salary difference: ' || sal_diff);  
+END;
+--------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
